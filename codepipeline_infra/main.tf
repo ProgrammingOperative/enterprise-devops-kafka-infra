@@ -29,13 +29,13 @@ provider "aws" {
 # SECRETS MANAGER FOR CONFLUENT CREDENTIALS
 ##############################################
 
-resource "aws_secretsmanager_secret" "confluent_credentials" {
-  name        = "confluent/credentials"
+resource "aws_secretsmanager_secret" "confluent_kafka_creds" {
+  name        = "confluent/kafka_creds1"
   description = "Confluent Cloud API credentials for Terraform provider"
 }
 
 resource "aws_secretsmanager_secret_version" "confluent_creds_ver" {
-  secret_id = aws_secretsmanager_secret.confluent_credentials.id
+  secret_id = aws_secretsmanager_secret.confluent_kafka_creds.id
 
   secret_string = jsonencode({
     kafka_api_key    = var.kafka_api_key
@@ -112,7 +112,7 @@ resource "aws_codebuild_project" "confluent_apply" {
     # Secrets from Secrets Manager (auto injected)
     environment_variable {
       name      = "CONFLUENT_CREDENTIALS"
-      value     = aws_secretsmanager_secret.confluent_credentials.arn
+      value     = aws_secretsmanager_secret.confluent_kafka_creds.arn
       type      = "SECRETS_MANAGER"
     }
   }
@@ -129,8 +129,8 @@ resource "aws_codebuild_project" "confluent_apply" {
 # CODEPIPELINE
 ##############################################
 
-resource "aws_iam_role" "codepipeline_role" {
-  name = "codepipeline-confluent-role"
+resource "aws_iam_role" "codepipeline_confluent_role" {
+  name = "codepipeline-confluent-kafka-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -144,7 +144,7 @@ resource "aws_iam_role" "codepipeline_role" {
 
 resource "aws_iam_role_policy" "codepipeline_policy" {
   name = "codepipeline-confluent-policy"
-  role = aws_iam_role.codepipeline_role.id
+  role = aws_iam_role.codepipeline_confluent_role.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -169,7 +169,7 @@ resource "aws_s3_bucket" "pipeline_bucket" {
 
 resource "aws_codepipeline" "confluent_pipeline" {
   name     = "confluent-topic-pipeline"
-  role_arn = aws_iam_role.codepipeline_role.arn
+  role_arn = aws_iam_role.codepipeline_confluent_role.arn
   artifact_store {
     location = aws_s3_bucket.pipeline_bucket.bucket
     type     = "S3"

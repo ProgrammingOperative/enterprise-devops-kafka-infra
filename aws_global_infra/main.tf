@@ -19,7 +19,7 @@ resource "aws_dynamodb_table" "terraform_lock" {
 }
 
 # ======================================================== S3 Bucket for Terraform State + policy ===============================
-resource "aws_s3_bucketinfra/codepipeline/terraform.tfstate" "terraform_state" {
+resource "aws_s3_bucket" "terraform_state" {
   bucket = "confluent-state-bucket-wachira"
 
   tags = {
