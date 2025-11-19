@@ -30,7 +30,7 @@ provider "aws" {
 ##############################################
 
 resource "aws_secretsmanager_secret" "confluent_kafka_creds" {
-  name        = "confluent/kafka_creds1"
+  name        = "confluent/kafka_creds2"
   description = "Confluent Cloud API credentials for Terraform provider"
 }
 
